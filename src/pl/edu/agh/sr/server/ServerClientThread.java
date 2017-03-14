@@ -11,10 +11,10 @@ import java.net.Socket;
  */
 public class ServerClientThread implements Runnable {
     private Socket socket;
-    private TCPServer server;
+    private Server server;
     private PrintWriter out;
 
-    public ServerClientThread(TCPServer server, Socket socket) {
+    public ServerClientThread(Server server, Socket socket) {
         this.socket = socket;
         this.server = server;
     }
@@ -38,30 +38,20 @@ public class ServerClientThread implements Runnable {
             return;
         }
 
-        writeMessage("Enter your username: ");
-        try {
-            String username = in.readLine();
-            server.log(Thread.currentThread().getName() + "| User set username to " + username);
-            Thread.currentThread().setName(Thread.currentThread().getName() + "#" + username);
-            writeMessage("\nYour username is " + username);
-            writeMessage("#########################################");
-        } catch (IOException e) {
-            server.log(Thread.currentThread().getName() + "| Error while reading from the input stream (IOException caught: "
-                        + e
-                        + ").");
-            onQuit();
-            return;
-        }
-
         while (true) {
             try {
                 String message = in.readLine();
                 if (message != null) {
                     server.log(Thread.currentThread().getName() + "| Received message: '" + message + "'.");
-                    server.broadcastMessage(
-                            this,
-                            Thread.currentThread().getName().split("#", 2)[1] + ": " + message
-                    );
+                    if (message.startsWith("\\u#")) {
+                        String username = message.substring(3);
+                        server.log(Thread.currentThread().getName() + "| User set username to " + username);
+                        Thread.currentThread().setName(Thread.currentThread().getName() + "#" + username);
+                        writeMessage("\nYour username is " + username);
+                        writeMessage("#########################################");
+                    }
+                    else
+                        server.broadcastMessage(this, message);
                 }
                 else {
                     onQuit();

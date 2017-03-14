@@ -5,33 +5,32 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class TCPServer {
+public class Server {
     private static final int port = 8000;
     private ServerSocket serverSocket = null;
-    private List<ServerClientThread> clients; //OPTIONAL: change List to something concurrent
+    private List<ServerClientThread> clients;
     private ExecutorService executorService;
 
-    private UDPServer udpServer = null;
+    private UDPThread udpThread = null;
 
-    public TCPServer() {
+    public Server() {
         clients = new ArrayList<>();
-        udpServer = new UDPServer(this, port);
+        udpThread = new UDPThread(this, port);
 
         executorService = Executors.newFixedThreadPool(15);
     }
 
     public static void main(String[] args) {
-        TCPServer server = new TCPServer();
+        Server server = new Server();
         server.start();
     }
 
     public void start() {
         System.out.println("CHAT SERVER");
-        Thread.currentThread().setName("Thread-TCPServer");
+        Thread.currentThread().setName("Thread-Server");
 
         Socket clientSocket = null;
 
@@ -48,7 +47,7 @@ public class TCPServer {
         log(Thread.currentThread().getName() + "| TCP socket created.");
         log(Thread.currentThread().getName() + "| TCP socket info: " + serverSocket);
 
-        udpServer.start();
+        udpThread.start();
 
         while(true) {
             try {
@@ -70,26 +69,29 @@ public class TCPServer {
     }
 
     public void log(String message) {
-        // console log
         System.out.println(message);
-
-        //TODO: file log
     }
 
-    public synchronized void addClient(ServerClientThread client) {
-        clients.add(client);
-        log(Thread.currentThread().getName() + "| New user added: " + client + ".");
+    public void addClient(ServerClientThread client) {
+        synchronized (this) {
+            clients.add(client);
+            log(Thread.currentThread().getName() + "| New user added: " + client + ".");
+        }
     }
 
-    public synchronized void removeClient(ServerClientThread client) {
-        clients.remove(client);
-        log(Thread.currentThread().getName() + "| User " + client + " removed.");
+    public void removeClient(ServerClientThread client) {
+        synchronized (this) {
+            clients.remove(client);
+            log(Thread.currentThread().getName() + "| User " + client + " removed.");
+        }
     }
 
-    public synchronized void broadcastMessage(ServerClientThread broadcastingClient, String message) {
-        for (ServerClientThread client : clients) {
-            if (!client.equals(broadcastingClient))
-                client.writeMessage(message);
+    public void broadcastMessage(ServerClientThread broadcastingClient, String message) {
+        synchronized (this) {
+            for (ServerClientThread client : clients) {
+                if (!client.equals(broadcastingClient))
+                    client.writeMessage(message);
+            }
         }
     }
 
