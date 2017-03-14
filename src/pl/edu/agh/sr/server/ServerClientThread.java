@@ -9,12 +9,12 @@ import java.net.Socket;
 /**
  * Created by Julia Samól on 13.03.2017.
  */
-public class ServerClientThread extends Thread {
+public class ServerClientThread implements Runnable {
     private Socket socket;
-    private Server server;
+    private TCPServer server;
     private PrintWriter out;
 
-    public ServerClientThread(Server server, Socket socket) {
+    public ServerClientThread(TCPServer server, Socket socket) {
         this.socket = socket;
         this.server = server;
     }
@@ -30,7 +30,7 @@ public class ServerClientThread extends Thread {
             );
             out = new PrintWriter(socket.getOutputStream(), true);
         } catch (IOException e) {
-            server.log(getName()
+            server.log(Thread.currentThread().getName()
                         + "| Error while creating io streams (IOException caught: "
                         + e
                         + ").");
@@ -41,12 +41,12 @@ public class ServerClientThread extends Thread {
         writeMessage("Enter your username: ");
         try {
             String username = in.readLine();
-            server.log(getName() + "| User set username to " + username);
-            setName(getName() + "#" + username);
+            server.log(Thread.currentThread().getName() + "| User set username to " + username);
+            Thread.currentThread().setName(Thread.currentThread().getName() + "#" + username);
             writeMessage("\nYour username is " + username);
             writeMessage("#########################################");
         } catch (IOException e) {
-            server.log(getName() + "| Error while reading from the input stream (IOException caught: "
+            server.log(Thread.currentThread().getName() + "| Error while reading from the input stream (IOException caught: "
                         + e
                         + ").");
             onQuit();
@@ -57,15 +57,18 @@ public class ServerClientThread extends Thread {
             try {
                 String message = in.readLine();
                 if (message != null) {
-                    server.log(getName() + "| Received message: '" + message + "'.");
-                    server.broadcastMessage(this, message);
+                    server.log(Thread.currentThread().getName() + "| Received message: '" + message + "'.");
+                    server.broadcastMessage(
+                            this,
+                            Thread.currentThread().getName().split("#", 2)[1] + ": " + message
+                    );
                 }
                 else {
                     onQuit();
                     return;
                 }
             } catch (IOException e) {
-                server.log(getName() + "| Error while reading from the input stream (IOException caught: "
+                server.log(Thread.currentThread().getName() + "| Error while reading from the input stream (IOException caught: "
                         + e
                         + ").");
                 onQuit();
@@ -75,19 +78,6 @@ public class ServerClientThread extends Thread {
 
     }
 
-    @Override
-    public void interrupt() {
-        super.interrupt();
-        try {
-            socket.close();
-        } catch (IOException e) {
-            server.log(getName()
-                    + "| Error while closing the client socket (IOException caught: "
-                    + e
-                    + ").");
-        }
-        onQuit();
-    }
 
     public void writeMessage(String message) {
         out.println(message);
@@ -95,6 +85,6 @@ public class ServerClientThread extends Thread {
 
     public void onQuit() {
         server.removeClient(this);
-        server.log(getName() + " was interrupted.");
+        server.log(Thread.currentThread().getName() + " was interrupted.");
     }
 }

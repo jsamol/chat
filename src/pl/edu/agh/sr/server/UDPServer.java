@@ -6,12 +6,12 @@ import java.net.SocketException;
 /**
  * Created by Julia Samól on 13.03.2017.
  */
-public class UDPServerThread extends Thread {
-    private Server server;
+public class UDPServer extends Thread {
+    private TCPServer server;
     private int port;
     private DatagramSocket datagramSocket = null;
 
-    public UDPServerThread(Server server, int port) {
+    public UDPServer(TCPServer server, int port) {
         this.server = server;
         this.port = port;
     }
