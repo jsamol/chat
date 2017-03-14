@@ -4,10 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.Socket;
+import java.net.*;
 
 /**
  * Created by Julia Samól on 14.03.2017.
@@ -16,11 +13,13 @@ public class ConsoleHandler extends Thread {
     private Client client;
     private Socket socket;
     private DatagramSocket datagramSocket;
+    private MulticastSocket multicastSocket;
 
-    public ConsoleHandler(Client client, Socket socket, DatagramSocket datagramSocket) {
+    public ConsoleHandler(Client client, Socket socket, DatagramSocket datagramSocket, MulticastSocket multicastSocket) {
         this.client = client;
         this.socket = socket;
         this.datagramSocket = datagramSocket;
+        this.multicastSocket = multicastSocket;
     }
 
     @Override
@@ -34,7 +33,7 @@ public class ConsoleHandler extends Thread {
 
         try {
             out = new PrintWriter(socket.getOutputStream(), true);
-            address = InetAddress.getByName("localhost");
+            address = InetAddress.getByName(client.getHost());
 
             out.println("\\u#" + client.getUsername());
 
@@ -57,12 +56,18 @@ public class ConsoleHandler extends Thread {
                     return;
                 }
                 else if (userInput.startsWith("\\M")) {
-                    byte[] sendBuffer = (client.getUsername() + ": " + userInput.substring(3)).getBytes();
-                    DatagramPacket sendPacket = new DatagramPacket(sendBuffer, sendBuffer.length, address, client.getPort());
-                    datagramSocket.send(sendPacket);
+                    if (userInput.length() > 2) {
+                        byte[] sendBuffer = (client.getUsername() + ": " + userInput.substring(3)).getBytes();
+                        DatagramPacket sendPacket = new DatagramPacket(sendBuffer, sendBuffer.length, address, client.getPort());
+                        datagramSocket.send(sendPacket);
+                    }
                 }
                 else if (userInput.startsWith("\\N")) {
-
+                    if (userInput.length() > 2) {
+                        byte[] sendBuffer = (client.getUsername() + ": " + userInput.substring(3)).getBytes();
+                        DatagramPacket sendPacket = new DatagramPacket(sendBuffer, sendBuffer.length, InetAddress.getByName(client.getGroup()), client.getMulticastPort());
+                        multicastSocket.send(sendPacket);
+                    }
                 }
                 else
                     out.println(client.getUsername() + ": " + userInput);

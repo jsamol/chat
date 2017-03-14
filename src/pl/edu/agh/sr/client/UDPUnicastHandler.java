@@ -7,10 +7,10 @@ import java.net.DatagramSocket;
 /**
  * Created by Julia Samól on 14.03.2017.
  */
-public class UDPHandler extends Thread {
+public class UDPUnicastHandler extends Thread {
     private DatagramSocket datagramSocket;
 
-    public UDPHandler(DatagramSocket datagramSocket) {
+    public UDPUnicastHandler(DatagramSocket datagramSocket) {
         this.datagramSocket = datagramSocket;
     }
 

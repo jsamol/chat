@@ -10,14 +10,14 @@ import java.util.List;
 /**
  * Created by Julia Samól on 13.03.2017.
  */
-public class UDPThread extends Thread {
+public class UDPUnicastThread extends Thread {
     private Server server;
     private List<UDPData> clients;
 
     private int port;
     private DatagramSocket datagramSocket = null;
 
-    public UDPThread(Server server, int port) {
+    public UDPUnicastThread(Server server, int port) {
         this.server = server;
         this.port = port;
 
@@ -26,7 +26,7 @@ public class UDPThread extends Thread {
 
     @Override
     public void run() {
-        setName("Thread-UDP");
+        setName("Thread-UnicastUDP");
         try {
             datagramSocket = new DatagramSocket(port);
             byte[] receiveBuffer = new byte[1024];
@@ -56,7 +56,7 @@ public class UDPThread extends Thread {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            server.log(getName() + "| Exception caught: " + e + ".");
         } finally {
             if (datagramSocket != null)
                 datagramSocket.close();

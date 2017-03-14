@@ -9,16 +9,20 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Server {
-    private static final int port = 8000;
+    private final int port = 8000;
+    private final int multicastPort = 8080;
+    private final String group = "224.0.0.1";
     private ServerSocket serverSocket = null;
     private List<ServerClientThread> clients;
     private ExecutorService executorService;
 
-    private UDPThread udpThread = null;
+    private UDPUnicastThread udpUnicastThread = null;
+    private UDPMulticastThread udpMulticastThread = null;
 
     public Server() {
         clients = new ArrayList<>();
-        udpThread = new UDPThread(this, port);
+        udpUnicastThread = new UDPUnicastThread(this, port);
+        udpMulticastThread = new UDPMulticastThread(this, group, multicastPort);
 
         executorService = Executors.newFixedThreadPool(15);
     }
@@ -47,7 +51,8 @@ public class Server {
         log(Thread.currentThread().getName() + "| TCP socket created.");
         log(Thread.currentThread().getName() + "| TCP socket info: " + serverSocket);
 
-        udpThread.start();
+        udpUnicastThread.start();
+        udpMulticastThread.start();
 
         while(true) {
             try {
