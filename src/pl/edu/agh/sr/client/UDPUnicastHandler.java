@@ -26,7 +26,7 @@ public class UDPUnicastHandler extends Thread {
             }
 
             String message = new String(receivePacket.getData());
-            System.out.println(message);
+            System.out.println(message.split("#", 2)[1]);
         }
     }
 }

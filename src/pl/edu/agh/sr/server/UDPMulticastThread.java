@@ -13,6 +13,10 @@ public class UDPMulticastThread extends Thread {
     private String group;
     private int port;
 
+    InetAddress groupAddress;
+
+    private MulticastSocket multicastSocket;
+
     public UDPMulticastThread(Server server, String group, int port) {
         this.server = server;
         this.group = group;
@@ -22,8 +26,8 @@ public class UDPMulticastThread extends Thread {
     @Override
     public void run() {
         setName("Thread-MulticastUDP");
-        MulticastSocket multicastSocket = null;
-        InetAddress groupAddress = null;
+        multicastSocket = null;
+        groupAddress = null;
         try {
             multicastSocket = new MulticastSocket(port);
             groupAddress = InetAddress.getByName(group);
@@ -48,5 +52,15 @@ public class UDPMulticastThread extends Thread {
                     server.log(getName() + "| Error while leaving the group (IOException caught: )" + e + ").");
                 }
         }
+    }
+
+    @Override
+    public void interrupt() {
+        if (multicastSocket != null)
+            try {
+                multicastSocket.leaveGroup(groupAddress);
+            } catch (IOException e) {
+                server.log(getName() + "| Error while leaving the group (IOException caught: )" + e + ").");
+            }
     }
 }

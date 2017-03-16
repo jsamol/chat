@@ -109,6 +109,10 @@ public class Server {
                     + e
                     + ").");
         }
+
+        udpUnicastThread.interrupt();
+        udpMulticastThread.interrupt();
+        executorService.shutdown();
         log(Thread.currentThread().getName() + " was interrupted.");
     }
 }

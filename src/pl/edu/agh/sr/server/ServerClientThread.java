@@ -49,9 +49,10 @@ public class ServerClientThread implements Runnable {
                         Thread.currentThread().setName(Thread.currentThread().getName() + "#" + username);
                         writeMessage("\nYour username is " + username);
                         writeMessage("#########################################");
-                    }
+                        writeMessage("\\u#" + Thread.currentThread().getName());
+                     }
                     else
-                        server.broadcastMessage(this, message);
+                        server.broadcastMessage(this, message.split("#", 2)[1]);
                 }
                 else {
                     onQuit();

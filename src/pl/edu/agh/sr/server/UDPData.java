@@ -1,4 +1,4 @@
-package pl.edu.agh.sr.client;
+package pl.edu.agh.sr.server;
 
 import java.net.InetAddress;
 

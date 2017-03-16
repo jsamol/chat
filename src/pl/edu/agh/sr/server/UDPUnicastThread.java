@@ -1,7 +1,5 @@
 package pl.edu.agh.sr.server;
 
-import pl.edu.agh.sr.client.UDPData;
-
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.util.ArrayList;
@@ -61,5 +59,12 @@ public class UDPUnicastThread extends Thread {
             if (datagramSocket != null)
                 datagramSocket.close();
         }
+    }
+
+    @Override
+    public void interrupt() {
+        super.interrupt();
+        if (datagramSocket != null)
+            datagramSocket.close();
     }
 }

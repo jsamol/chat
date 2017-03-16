@@ -70,12 +70,19 @@ public class Client {
             udpUnicastHandler = new UDPUnicastHandler(datagramSocket);
             udpUnicastHandler.start();
 
-            udpMulticastHandler = new UDPMulticastHandler(multicastSocket);
+            udpMulticastHandler = new UDPMulticastHandler(this, multicastSocket);
             udpMulticastHandler.start();
 
             while (true) {
                 String message = in.readLine();
-                System.out.println(message);
+                if (message == null) {
+                    System.exit(-1);
+                }
+                else if (message.startsWith("\\u#")) {
+                    setUsername(message.substring(3));
+                }
+                else
+                    System.out.println(message);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -119,6 +126,8 @@ public class Client {
     public void interruptRunning() {
         if (udpUnicastHandler != null)
             udpUnicastHandler.interrupt();
+        if (udpMulticastHandler != null)
+            udpMulticastHandler.interrupt();
         System.exit(0);
     }
 }
