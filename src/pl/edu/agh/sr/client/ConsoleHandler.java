@@ -37,6 +37,7 @@ public class ConsoleHandler extends Thread {
 
             out.println("\\u#" + client.getUsername());
 
+            //TODO: send info packet through TCP
             byte[] sendInfo = "\\info#".getBytes();
             DatagramPacket infoPacket = new DatagramPacket(sendInfo, sendInfo.length, address, client.getPort());
             datagramSocket.send(infoPacket);

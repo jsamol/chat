@@ -34,7 +34,7 @@ public class Client {
     public void start() {
         System.out.println("CHAT\n"
                 + "commands:\n"
-                + "'\\quit()' - exit the application\n"
+                + "'\\quit' - exit the application\n"
                 + "'\\M <input>' - send via UDP (unicast)\n"
                 + "'\\N <input>' - send via UDP (multicast)\n"
                 + "###############################################\n");
